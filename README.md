@@ -17,9 +17,11 @@
 
 ## 1. Executive Summary
 
-RTIE is a production-grade deep learning system designed to diagnose radiator faults (Blockage, Scaling, Air Trapped, Imbalance) from thermal images. Unlike standard "black box" classifiers, RTIE integrates **physics-based feature fusion** (thermodynamic gradients, entropy) with an **EfficientNet-B0** backbone to ensure reliability and interpretability.
+**Heating inefficiencies in domestic radiators are often difficult to detect through manual thermal inspection, leading to energy waste and inconsistent diagnostics.**
 
-The dataset consists of **5,000 thermodynamically simulated radiator heatmaps** with injected stochastic sensor noise to approximate real-world variability.
+RTIE is a production-grade deep learning system designed to diagnose radiator faults (Blockage, Scaling, Air Trapped, Imbalance) from thermal images. Unlike conventional black-box classifiers, RTIE integrates **physics-based feature fusion** (thermodynamic gradients, entropy) with an **EfficientNet-B0** backbone to ensure reliability and interpretability.
+
+The dataset consists of **5,000 thermodynamically simulated radiator heatmaps** (1,000 per class) with injected stochastic sensor noise and temperature drift to approximate real-world variability.
 
 The system features a **safety-critical design** with explicit uncertainty estimation (MC Dropout) and calibration (Temperature Scaling), ensuring that low-confidence predictions are flagged for manual review rather than failing silently.
 
@@ -64,7 +66,7 @@ Industrial heat exchangers, outdoor radiators, or non-thermal imagery.
 ECE reduced to 0.1044 via temperature scaling.
 
 **Risks:**  
-Domain shift possible when transitioning to real thermal cameras.
+Domain shift possible when transitioning to real thermal cameras. Validation on real-world thermal imagery remains necessary prior to operational deployment.
 
 ---
 
@@ -192,6 +194,7 @@ python3 train.py
 python3 evaluate.py
 python3 robustness_test.py
 ```
+**All experiments were conducted with fixed random seeds defined in `config.py` to ensure deterministic training reproducibility.**
 
 ### Run API
 ```bash
@@ -202,6 +205,13 @@ uvicorn app:app --port 8000
 curl -X POST "http://localhost:8000/predict" \
      -F "file=@data/synthetic/blockage/0001.png"
 ```
+
+### Quick Demo
+After launching the API, visit:
+
+`http://localhost:8000/docs`
+
+The interactive Swagger UI allows for real-time image upload and inspection directly in your browser.
 
 ### Sample API Response
 ```json
