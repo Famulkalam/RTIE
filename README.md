@@ -206,12 +206,27 @@ curl -X POST "http://localhost:8000/predict" \
      -F "file=@data/synthetic/blockage/0001.png"
 ```
 
-### Quick Demo
+### Quick Demo (Local)
 After launching the API, visit:
 
 `http://localhost:8000/docs`
 
 The interactive Swagger UI allows for real-time image upload and inspection directly in your browser.
+
+### Hugging Face Spaces Demo
+A Gradio-based demo script is available in the `demo/` folder for visual interaction.
+
+**Run locally:**
+```bash
+python3 demo/app.py
+```
+Then visit `http://localhost:7860`.
+
+**Deploy to Hugging Face Spaces:**
+1.  Create a new Space (SDK: **Gradio**).
+2.  Connect this repository.
+3.  In Settings > **App File**, set to: `demo/app.py`.
+4.  The Space will auto-install `demo/requirements.txt` and run the app.
 
 ### Sample API Response
 ```json
