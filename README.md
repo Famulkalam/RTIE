@@ -1,5 +1,10 @@
 # Radiator Thermal Intelligence Engine (RTIE)
 
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.x-red)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Model-95%25_Accuracy-success)
+
 **Physics-informed, deployment-ready AI system for radiator fault detection.**
 
 - **95.07%** Test Accuracy
@@ -14,6 +19,8 @@
 
 RTIE is a production-grade deep learning system designed to diagnose radiator faults (Blockage, Scaling, Air Trapped, Imbalance) from thermal images. Unlike standard "black box" classifiers, RTIE integrates **physics-based feature fusion** (thermodynamic gradients, entropy) with an **EfficientNet-B0** backbone to ensure reliability and interpretability.
 
+The dataset consists of **5,000 thermodynamically simulated radiator heatmaps** with injected stochastic sensor noise to approximate real-world variability.
+
 The system features a **safety-critical design** with explicit uncertainty estimation (MC Dropout) and calibration (Temperature Scaling), ensuring that low-confidence predictions are flagged for manual review rather than failing silently.
 
 ---
@@ -22,9 +29,10 @@ The system features a **safety-critical design** with explicit uncertainty estim
 
 ```
 rtie/
-├── data/                   # Synthetic data generation and storage
+├── data/                   # Synthetic data generation and coverage
 ├── models/                 # Model architecture and ONNX exports
 ├── report/                 # Generated artifacts (plots, metrics, heatmaps)
+├── docs/                   # Documentation and walkthroughs
 ├── app.py                  # FastAPI production inference server
 ├── business_metrics.py     # Energy loss and cost impact logic
 ├── config.py               # Hyperparameters and system constants
@@ -41,17 +49,36 @@ rtie/
 
 ---
 
-## 3. Key Design Decisions
+## 3. Model Card
+
+**Intended Use:**  
+Radiator thermal fault detection in controlled indoor residential environments.
+
+**Not Intended For:**  
+Industrial heat exchangers, outdoor radiators, or non-thermal imagery.
+
+**Performance Summary:**  
+95.07% test accuracy on synthetic validation set.
+
+**Calibration:**  
+ECE reduced to 0.1044 via temperature scaling.
+
+**Risks:**  
+Domain shift possible when transitioning to real thermal cameras.
+
+---
+
+## 4. Key Design Decisions
 
 - **EfficientNet-B0 Backbone**: Selected for the optimal balance between feature extraction capability and edge-device latency (10ms inference).
-- **Physics Feature Fusion**: Explicitely injects thermodynamic domain knowledge (e.g., vertical gradients, cold spot ratios) into the dense layer, improving convergence and interpretability.
+- **Physics Feature Fusion**: Explicitly injects thermodynamic domain knowledge (e.g., vertical gradients, cold spot ratios) into the dense layer, improving convergence and interpretability.
 - **MC Dropout**: Enables uncertainty estimation by running multiple forward passes at inference time to measure prediction variance.
 - **Post-hoc Temperature Scaling**: Applied to calibrate the model's confidence scores, reducing Expected Calibration Error (ECE) from 0.31 to 0.10.
 - **ONNX Export**: Quantization-ready format chosen to facilitate deployment on low-power edge hardware.
 
 ---
 
-## 4. System Architecture
+## 5. System Architecture
 
 ```mermaid
 graph TD
@@ -90,7 +117,7 @@ graph TD
 
 ---
 
-## 5. Performance & Robustness
+## 6. Performance & Robustness
 
 **Test Set Accuracy**: 95.07% (on 750 held-out images)
 
@@ -117,7 +144,20 @@ We stressed the model against synthetic perturbations to simulate real-world fie
 
 ---
 
-## 6. Limitations
+## 7. Visual Outputs
+
+### Confusion Matrix
+![Confusion Matrix](report/confusion_matrix.png)
+
+### Calibration Curve
+![Calibration Curve](report/calibration_curve.png)
+
+### Grad-CAM Example
+![Grad-CAM Example](report/gradcam/gradcam_blockage.png)
+
+---
+
+## 8. Limitations
 
 - **Synthetic Data**: The model was trained entirely on physics-simulated data. While efforts were made to inject realistic noise and variability, a domain gap may exist when deployed on real-world thermal cameras.
 - **Air Trapped Precision**: The `air_trapped` class has slightly lower precision (85%) compared to other classes, likely due to feature overlap with `imbalance`.
@@ -125,7 +165,12 @@ We stressed the model against synthetic perturbations to simulate real-world fie
 
 ---
 
-## 7. Installation & Usage
+## 9. Installation & Usage
+
+### Tested On
+- Python 3.10+
+- PyTorch 2.x
+- CUDA 12.x (optional)
 
 ### Setup
 ```bash
@@ -158,9 +203,20 @@ curl -X POST "http://localhost:8000/predict" \
      -F "file=@data/synthetic/blockage/0001.png"
 ```
 
+### Sample API Response
+```json
+{
+  "status": "auto_approved",
+  "fault_label": "blockage",
+  "confidence": 0.8806,
+  "uncertainty_std": 0.0446,
+  "estimated_annual_cost_gbp": 108.86
+}
+```
+
 ---
 
-## 8. Future Work
+## 10. Future Work
 
 - **Real-World Fine-Tuning**: Collect a small dataset of real thermal images to fine-tune the synthetic model (Sim2Real transfer).
 - **Active Learning Loop**: Implement a feedback mechanism where "Manual Review" cases are labeled and fed back into training.
