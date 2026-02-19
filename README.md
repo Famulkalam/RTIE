@@ -227,6 +227,8 @@ The interactive Swagger UI allows for real-time image upload and inspection dire
 ### Hugging Face Spaces Demo
 A Gradio-based demo script is available in the `demo/` folder for visual interaction.
 
+**[Try the Live Demo Here](https://huggingface.co/spaces/famulkalam/RTIE)** 🚀
+
 **Run locally:**
 ```bash
 python3 demo/app.py
