@@ -1,3 +1,14 @@
+---
+title: RTIE - Radiator Fault Detection
+emoji: 🌡️
+colorFrom: red
+colorTo: blue
+sdk: gradio
+app_file: demo/app.py
+pinned: false
+license: mit
+---
+
 # Radiator Thermal Intelligence Engine (RTIE)
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
