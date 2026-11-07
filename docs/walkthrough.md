@@ -1,8 +1,7 @@
-# RTIE — Verification Walkthrough
+# RTIE: Verification Walkthrough
 
-**Status**: ✅ Success
-**Model Version**: EfficientNet-B0 + Physics Fusion (Epoch 11 - Retrained 15 Epochs)
-**Test Accuracy**: 95.07%
+**Model**: EfficientNet-B0 + physics feature fusion (best checkpoint at epoch 11; training early-stopped)
+**Test accuracy**: 95.07% on 750 held-out synthetic images
 
 ## 1. System Architecture
 
@@ -53,11 +52,11 @@ The model achieved **95.07% accuracy** on the held-out test set (750 images), me
 | **scaling** | 0.9252 | 0.9067 | 0.9158 |
 | **air_trapped** | 0.8528 | 0.9267 | 0.8882 |
 
-> [!IMPORTANT]
-> **Critical Safety**: The model achieved **100% recall** for the **Blockage** class, ensuring no severe system faults are missed.
+> [!NOTE]
+> The model achieved **100% recall** for the **Blockage** class on the synthetic test set. This needs confirming on real thermal images.
 
 ### Confusion Matrix
-![Confusion Matrix](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/confusion_matrix.png)
+![Confusion Matrix](../report/confusion_matrix.png)
 
 ## 3. Efficiency Estimation
 
@@ -69,11 +68,11 @@ The multi-task regression head predicts radiator efficiency (0-100) with high pr
 - **ECE (Expected Calibration Error)**: 0.1044
 - **Note**: Temperature Scaling (T=0.678) successfully reduced ECE from ~0.31 to 0.10. The `log_temperature` optimization ensured stability.
 - **Calibration Curve**:
-  ![Calibration Curve](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/calibration_curve.png)
+  ![Calibration Curve](../report/calibration_curve.png)
 
 ## 5. Robustness Testing
 
-The model demonstrates **excellent robustness**, significantly improved by the new Gaussian noise augmentation strategy.
+Accuracy stays close to the clean-data level under simulated perturbations. Adding Gaussian noise augmentation during training was what fixed the earlier sensitivity to noise.
 
 | Perturbation | Robustness | Accuracy | Notes |
 |---|---|---|---|
@@ -83,19 +82,19 @@ The model demonstrates **excellent robustness**, significantly improved by the n
 | **Blur (7x7)** | High | 94.0% | Feature extraction survives heavy smoothing. |
 | **Rotation (±20°)** | High | 95.6% | Robust to significant rotation. |
 
-![Robustness Chart](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/robustness_chart.png)
+![Robustness Chart](../report/robustness_chart.png)
 
 ## 6. Field Integration Simulation
 
-The model passed field simulation tests, confirming readiness for varied deployment conditions.
+Simulated field conditions (these approximate, but do not replace, real deployment tests):
 
 | Simulation | Accuracy | Status |
 |---|---|---|
 | **Aspect Ratio (Squashed/Stretched)** | >94.4% | ✅ Passed |
 | **Camera Distance (0.8x - 1.2x)** | >93.8% | ✅ Passed (Robust to zoom/crop) |
-| **Thermal Senor Drift** | >93.8% | ✅ Passed |
+| **Thermal Sensor Drift** | >93.8% | ✅ Passed |
 
-![Field Simulation](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/field_simulation.png)
+![Field Simulation](../report/field_simulation.png)
 
 ## 7. Explainability (Grad-CAM)
 
@@ -103,24 +102,22 @@ Grad-CAM visualizations confirm the model focuses on physically relevant regions
 
 | Fault Class | Heatmap Visualization |
 |---|---|
-| **Blockage** (Cold Bottom) | ![Blockage](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/gradcam/gradcam_blockage.png) |
-| **Air Trapped** (Cold Top-Right) | ![Air Trapped](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/gradcam/gradcam_air_trapped.png) |
-| **Scaling** (Patchy Cold) | ![Scaling](/Users/famulkalam/.gemini/antigravity/brain/bd050566-05ca-4829-9e6c-0347c41a7604/report/gradcam/gradcam_scaling.png) |
+| **Blockage** (Cold Bottom) | ![Blockage](../report/gradcam/gradcam_blockage.png) |
+| **Air Trapped** (Cold Top-Right) | ![Air Trapped](../report/gradcam/gradcam_air_trapped.png) |
+| **Scaling** (Patchy Cold) | ![Scaling](../report/gradcam/gradcam_scaling.png) |
 
 ## 8. Inference Benchmark
 
-ONNX optimization delivered a **15x speedup**, making the model highly suitable for edge deployment.
+In a local CPU benchmark, the ONNX export ran about 15x faster than the PyTorch model.
 
 - **PyTorch Latency**: 152.96 ms
 - **ONNX Latency**: 10.05 ms
 - **Speedup**: **15.22x**
 
-> [!TIP]
-> **Edge Ready**: The 10ms inference time allows for real-time video processing at ~100 FPS on CPU.
 
 ## 9. Sample API Response
 
-Below is a real response from the `POST /predict` endpoint for a **Blockage** fault:
+Example response from the `POST /predict` endpoint for a synthetic **Blockage** image:
 
 ```json
 {

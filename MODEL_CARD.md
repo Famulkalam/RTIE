@@ -1,9 +1,9 @@
 # Model Card: Radiator Thermal Intelligence Engine (RTIE)
 
 ## Model Details
-- **Developer**: FAMUL KALAM
+- **Developer**: Famul Kalam
 - **Model Date**: February 2026
-- **Model Version**: v1.0.0 (Epoch 15 Checkpoint)
+- **Model Version**: v1.0.0 (best validation-loss checkpoint)
 - **Model Type**: Multi-Task EfficientNet-B0 + Physics Feature Fusion
 - **License**: MIT
 
@@ -18,13 +18,13 @@
 
 ## Factors
 - **Environment**: Performance may degrade in extreme ambient temperatures or poor lighting conditions (though thermal imaging mitigates lighting issues).
-- **Sensor Quality**: Tested robustly against Gaussian noise (up to 15σ), ensuring compatibility with lower-resolution thermal cameras.
-- **Deployment**: Optimized for edge deployment (ONNX) with <10ms latency on CPU.
+- **Sensor Quality**: Accuracy stays above 94% with simulated Gaussian noise up to σ = 15. This has not been confirmed on real low-resolution thermal cameras.
+- **Deployment**: ONNX export measured at about 10 ms per image on CPU in a local benchmark.
 
 ## Metrics
 The model is evaluated on a hold-out test set of 750 synthetic images.
 - **Accuracy**: 95.07%
-- **Recall (Blockage)**: 100.0% (Safety Critical)
+- **Recall (Blockage)**: 100.0% (on synthetic test data)
 - **Expected Calibration Error (ECE)**: 0.1044
 
 ## Training Data
@@ -35,7 +35,7 @@ The model is evaluated on a hold-out test set of 750 synthetic images.
 ## Evaluation Data
 - **Source**: Independent split of synthetic data (15% split).
 - **Size**: 750 images.
-- **stress Tests**: Evaluated against rotation, blur, noise, and simulated camera drift.
+- **Stress Tests**: Evaluated against rotation, blur, noise, and simulated camera drift.
 
 ## Ethical Considerations
 - **Automation Bias**: Users should not rely solely on the AI for safety-critical decisions without human oversight, although the "Safety Gate" logic is designed to flag low-confidence predictions.
